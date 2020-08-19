@@ -115,6 +115,17 @@ class Transformer(SequenceToSequence):
         decoder,
         share_embeddings=share_embeddings)
 
+  # <mod>
+  @property
+  def num_layers(self):
+      return len(self.encoder.layers)
+
+  @property
+  def num_heads(self):
+      return self.encoder.num_heads
+
+  # <\mod>
+
   @property
   def ctranslate2_spec(self):
     if not self._is_ct2_compatible:

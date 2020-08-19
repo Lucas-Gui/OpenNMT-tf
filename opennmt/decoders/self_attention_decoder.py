@@ -6,7 +6,7 @@ from opennmt.decoders import decoder
 from opennmt.layers import common, transformer
 from opennmt.layers.position import SinusoidalPositionEncoder
 
-
+X_test=True
 class SelfAttentionDecoder(decoder.Decoder):
   """Encoder using self-attention as described in
   https://arxiv.org/abs/1706.03762.
@@ -96,6 +96,14 @@ class SelfAttentionDecoder(decoder.Decoder):
            step=None,
            training=None):
     # Process inputs.
+    if X_test:
+        tf.print("Inputs in _run",step," : ", inputs.shape)
+        # tf.print("seqlen",sequence_length)
+        # tf.print(cache if cache is None else len(cache))
+        # tf.print("Memory : ", memory)
+        # tf.print(memory_sequence_length)
+        # tf.print(step)
+        # tf.print(training)
     inputs *= self.num_units**0.5
     if self.position_encoder is not None:
       inputs = self.position_encoder(inputs, position=step + 1 if step is not None else None)
@@ -124,6 +132,8 @@ class SelfAttentionDecoder(decoder.Decoder):
 
     # Run each layer.
     new_cache = []
+    attn_list = [] #<mod>
+    inputs_list = [] #<mod>
     for i, layer in enumerate(self.layers):
       inputs, layer_cache, attention = layer(
           inputs,
@@ -133,8 +143,16 @@ class SelfAttentionDecoder(decoder.Decoder):
           cache=cache[i] if cache is not None else None,
           training=training)
       new_cache.append(layer_cache)
+      attn_list.append(attention) #<mod>
+      inputs_list.append(self.layer_norm( inputs)) #<mod>
     outputs = self.layer_norm(inputs)
-    return outputs, new_cache, attention
+    attention = tf.concat(attn_list,  axis = 0, name="Attention")#<mod>
+
+    internal = tf.concat(inputs_list, axis = 0, name = "Internal") #<mod>
+    if X_test:
+        tf.print("Inputs in run : ", inputs.shape)
+        tf.print("Attention in _run : ", attention.shape)
+    return outputs, new_cache, attention, internal
 
   def forward(self,
               inputs,
@@ -145,6 +163,8 @@ class SelfAttentionDecoder(decoder.Decoder):
               input_fn=None,
               sampling_probability=None,
               training=None):
+    if X_test:
+        tf.print("Forward ")
     _ = initial_state
     _ = input_fn
     if sampling_probability is not None:
@@ -155,8 +175,9 @@ class SelfAttentionDecoder(decoder.Decoder):
         memory=memory,
         memory_sequence_length=memory_sequence_length,
         training=training)
+    internal = None  # <mod>Internal is returned by _run in a returning_attn context.
     logits = self.output_layer(outputs)
-    return logits, state, attention
+    return logits, state, attention, internal
 
   def step(self,
            inputs,
@@ -165,6 +186,7 @@ class SelfAttentionDecoder(decoder.Decoder):
            memory=None,
            memory_sequence_length=None,
            training=None):
+
     inputs = tf.expand_dims(inputs, 1)
     outputs, state, attention = self._run(
         inputs,
@@ -175,8 +197,17 @@ class SelfAttentionDecoder(decoder.Decoder):
         training=training)
     outputs = tf.squeeze(outputs, axis=1)
     if attention is not None:
+        #<mod> :
+      # if X_test:
+      #     tf.print("Attention returned by _run : ", attention.shape)
+      # shape = list(attention.shape)
+      # shape = [shape[0]*shape[1]]+[1]+shape[2:]
+      # attention = tf.reshape(attention, shape= shape)#<\mod>
       attention = tf.squeeze(attention, axis=1)
-    return outputs, state, attention
+      if X_test:
+        tf.print("Attention returned by step : ", attention.shape)
+    internal = None  # <mod>Internal is returned by _run in a returning_attn context.
+    return outputs, state, attention, internal
 
   def _get_initial_state(self, batch_size, dtype, initial_state=None):
     # The decoder state contains the keys and values projections of the previous timesteps.

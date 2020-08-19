@@ -9,7 +9,7 @@ import tensorflow_addons as tfa
 from opennmt import constants
 from opennmt.utils import misc
 
-
+X_test = True
 class Sampler(abc.ABC):
   """Base class for samplers."""
 
@@ -204,6 +204,8 @@ class GreedySearch(DecodingStrategy):
     return sample_ids, cum_log_probs, finished, state, kwargs
 
   def finalize(self, outputs, end_id, attention=None, **kwargs):
+    if X_test:
+        tf.print("BeamSearch._finalize. Attn : array of ", attention.element_shape )
     ids = tf.transpose(outputs.stack())
     ids = tf.expand_dims(ids, 1)
     lengths = _lengths_from_ids(ids, end_id)
@@ -405,6 +407,8 @@ def dynamic_decode(symbols_to_logits_fn,
   Returns:
     A :class:`opennmt.utils.DecodingResult` instance.
   """
+  if X_test :
+    tf.print("Entering dynamic_decode in decoding.py")
   if initial_state is None:
     initial_state = {}
   if decoding_strategy is None:
@@ -417,9 +421,15 @@ def dynamic_decode(symbols_to_logits_fn,
 
   def _body(step, finished, state, inputs, outputs, attention, cum_log_probs, extra_vars):
     # Get log probs from the model.
-    result = symbols_to_logits_fn(inputs, step, state)
-    logits, state = result[0], result[1]
+    if X_test:
+      tf.print("\n(_body) step : ",step, inputs)
+    result = symbols_to_logits_fn(inputs, step, state) #would be LanguageModel._decode in my case
+    if X_test:
+        tf.print("End of symbol_to_logits : ")
+    logits, state = result[0], result[1] #Is OK : result = (logits, state, attention, internal)
     attn = result[2] if len(result) > 2 else None
+    if X_test:
+      tf.print("Attention in _body : ", attn.shape)
     logits = tf.cast(logits, tf.float32)
 
     # Penalize or force EOS.
@@ -454,6 +464,7 @@ def dynamic_decode(symbols_to_logits_fn,
     if attention_history:
       if attn is None:
         raise ValueError("attention_history is set but the model did not return attention")
+
       attention = attention.write(step, tf.cast(attn, tf.float32))
     outputs = outputs.write(step, output)
     cum_log_probs = tf.where(finished, x=cum_log_probs, y=next_cum_log_probs)
@@ -498,6 +509,9 @@ def dynamic_decode(symbols_to_logits_fn,
       end_id,
       attention=attention if attention_history else None,
       **extra_vars)
+  #finalize stacks the attention TensorArray into an Array
+  if X_test:
+      tf.print("Shape before removing </s> : ", attention.shape)
   if attention is not None:
     attention = attention[:, :, :-1]  # Ignore attention for </s>.
   log_probs = tf.reshape(log_probs, [-1, decoding_strategy.num_hypotheses])

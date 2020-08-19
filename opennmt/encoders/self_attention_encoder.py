@@ -8,6 +8,7 @@ from opennmt.encoders.encoder import Encoder
 from opennmt.layers.position import SinusoidalPositionEncoder
 from opennmt.layers import common
 
+X_test=False
 
 class SelfAttentionEncoder(Encoder):
   """Encoder using self-attention as described in
@@ -49,6 +50,7 @@ class SelfAttentionEncoder(Encoder):
     """
     super(SelfAttentionEncoder, self).__init__(**kwargs)
     self.num_units = num_units
+    self.num_heads = num_heads #<mod> : added
     self.dropout = dropout
     self.position_encoder = None
     if position_encoder_class is not None:
@@ -66,16 +68,21 @@ class SelfAttentionEncoder(Encoder):
             maximum_relative_position=maximum_relative_position)
         for i in range(num_layers)]
 
-  def call(self, inputs, sequence_length=None, training=None):
+  def call(self, inputs, sequence_length=None, training=None,  return_attn=False):
     inputs *= self.num_units**0.5
+    attn_list = [] #<mod>
+    if X_test:
+        tf.print("--SAE.call--")
     if self.position_encoder is not None:
       inputs = self.position_encoder(inputs)
     inputs = common.dropout(inputs, self.dropout, training=training)
     mask = self.build_mask(inputs, sequence_length=sequence_length)
-    for layer in self.layers:
-      inputs = layer(inputs, mask=mask, training=training)
+    for l,layer in enumerate(self.layers): #<mod> : enumerate
+      inputs, attn = layer(inputs, mask=mask, training=training,  return_attn=return_attn) #<mod> : added attn
+      attn_list.append(attn) #<mod>
+    attention = tf.concat(attn_list, axis=0, name="Attention")  # <mod>
     outputs = self.layer_norm(inputs)
-    return outputs, None, sequence_length
+    return outputs, None, sequence_length, attention #<mod> : added attention
 
   def map_v1_weights(self, weights):
     m = []

@@ -5,7 +5,7 @@ import numpy as np
 
 from opennmt.layers import common
 from opennmt.utils import misc
-
+X_test=False
 
 def _lower_triangle_mask(sequence_length, maximum_length=None, dtype=tf.bool):
   batch_size = tf.shape(sequence_length)[0]
@@ -219,7 +219,7 @@ class MultiHeadAttention(tf.keras.layers.Layer):
           name="relative_position_values", shape=relative_repr_shape)
     super(MultiHeadAttention, self).build(input_shape)
 
-  def call(self, inputs, memory=None, mask=None, cache=None, training=None):  # pylint: disable=arguments-differ
+  def call(self, inputs, memory=None, mask=None, cache=None, training=None, inject=None):  # pylint: disable=arguments-differ
     """Runs the layer.
 
     Args:
@@ -290,6 +290,20 @@ class MultiHeadAttention(tf.keras.layers.Layer):
         mask = tf.expand_dims(mask, 1)  # Broadcast on time dimension.
       mask = tf.expand_dims(mask, 1)  # Broadcast on head dimension.
       dot = tf.cast(tf.cast(dot, tf.float32) * mask + ((1.0 - mask) * tf.float32.min), dot.dtype)
+    #<mod>
+    if X_test:
+      # tf.print("In MHA : (before softmaxing) ")
+      # tf.print("Computed attn : ", dot.shape, dot.dtype)
+      # # tf.print("Computed mask : ", mask)
+      if inject is not None:
+        tf.print("Injected attn : ", inject[0].shape)
+        tf.print(tf.where(inject[1]))
+    if inject is not None :
+      mask_inj = tf.cast(inject[1], tf.bool)
+      val_inj = tf.convert_to_tensor(inject[0], dot.dtype)
+      dot = tf.where(mask_inj, val_inj, dot)
+    # <\mod>
+
     attn = tf.cast(tf.nn.softmax(tf.cast(dot, tf.float32)), dot.dtype)
     drop_attn = common.dropout(attn, self.dropout, training=training)
     heads = tf.matmul(drop_attn, values)
@@ -299,6 +313,9 @@ class MultiHeadAttention(tf.keras.layers.Layer):
     # Concatenate all heads output.
     combined = combine_heads(heads)
     outputs = self.linear_output(combined)
+    # if X_test:
+    #     tf.print("After softmaxing and combining : ")
+    #     tf.print("Outputs", outputs.shape, outputs.dtype)
     if self.return_attention:
       return outputs, cache, attn
     return outputs, cache
@@ -382,9 +399,9 @@ class SelfAttentionEncoderLayer(tf.keras.layers.Layer):
     self.ffn = TransformerLayerWrapper(
         self.ffn, dropout)
 
-  def call(self, x, mask=None, training=None):  # pylint: disable=arguments-differ
+  def call(self, x, mask=None, training=None, inject=None):  # pylint: disable=arguments-differ
     """Runs the encoder layer."""
-    y, _ = self.self_attention(x, mask=mask, training=training)
+    y, _ = self.self_attention(x, mask=mask, training=training, inject=inject)
     y = self.ffn(y, training=training)
     return y
 

@@ -143,12 +143,12 @@ class SequenceToSequence(model.SequenceGenerator):
     if EmbeddingsSharingLevel.share_target_embeddings(self.share_embeddings):
       self.decoder.reuse_embeddings(self.labels_inputter.embedding)
 
-  def call(self, features, labels=None, training=None, step=None):
+  def call(self, features, labels=None, training=None, step=None, inject = None):
     # Encode the source.
     source_length = self.features_inputter.get_length(features)
     source_inputs = self.features_inputter(features, training=training)
     encoder_outputs, encoder_state, encoder_sequence_length = self.encoder(
-        source_inputs, sequence_length=source_length, training=training)
+        source_inputs, sequence_length=source_length, training=training, inject = inject)
 
     outputs = None
     predictions = None
@@ -169,7 +169,8 @@ class SequenceToSequence(model.SequenceGenerator):
           features,
           encoder_outputs,
           encoder_state,
-          encoder_sequence_length)
+          encoder_sequence_length
+      )
 
     return outputs, predictions
 

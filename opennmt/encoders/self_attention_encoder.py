@@ -65,15 +65,17 @@ class SelfAttentionEncoder(Encoder):
             ffn_activation=ffn_activation,
             maximum_relative_position=maximum_relative_position)
         for i in range(num_layers)]
+    self.num_heads= num_heads #<mod>
 
-  def call(self, inputs, sequence_length=None, training=None):
+  def call(self, inputs, sequence_length=None, training=None, inject=None):
     inputs *= self.num_units**0.5
     if self.position_encoder is not None:
       inputs = self.position_encoder(inputs)
     inputs = common.dropout(inputs, self.dropout, training=training)
     mask = self.build_mask(inputs, sequence_length=sequence_length)
-    for layer in self.layers:
-      inputs = layer(inputs, mask=mask, training=training)
+    for i,layer in enumerate(self.layers): #<mod>
+      inject_i = (inject[0][i,:,:,:], inject[1][i,:,:,:]) if inject is not None else None #<mod>
+      inputs = layer(inputs, mask=mask, training=training, inject=inject_i)
     outputs = self.layer_norm(inputs)
     return outputs, None, sequence_length
 

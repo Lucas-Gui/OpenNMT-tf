@@ -58,7 +58,7 @@ def get_dep(dep, dep_line, heads, head_table,n=1, head_i = None):
     head = []
     for i,(d,h ) in enumerate(zip(dep_line, head_table)):
         if d == dep and (head_i is None or h[0]<=head_i<=h[1]):
-            h = (u for u in range(h[0], h[1]+1)) #(i_min, imax) -> (i_min, ..., i_max)
+            h = tuple([u for u in range(h[0], h[1]+1)]) #(i_min, imax) -> (i_min, ..., i_max)
             tail.append(i)
             if not head :
                 head = h
@@ -365,7 +365,6 @@ if __name__ == '__main__':
     stats = get_stats(args.stats)
     # setting testing
     gen_test = args.test
-
     tasks = {k : task_dict[k] for k in args.T}
     try :
         os.mkdir(args.dest)

@@ -54,8 +54,8 @@ def main(args):
     with ExitStack() as exit:
         #readers and writers
         tokens_r = exit.enter_context(open(args.tokens))
-        pos_r = exit.enter_context(open(args.pos))
-        writer = exit.enter_context(open(args.pos+args.suffix, "w"))
+        pos_r = exit.enter_context(open(args.dep))
+        writer = exit.enter_context(open(args.dep+args.suffix, "w"))
         text_r = exit.enter_context(open(args.text))
         tokens_writer = exit.enter_context(open(args.tokens+args.suffix, "w") )
         for filename in args.sup:

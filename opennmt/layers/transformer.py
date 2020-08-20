@@ -423,7 +423,7 @@ class SelfAttentionEncoderLayer(tf.keras.layers.Layer):
   def call(self, x, mask=None, training=None,
            return_attn=False, inject=None):  # pylint: disable=arguments-differ
     """Runs the encoder layer."""
-    if return_attn:
+    if return_attn or self.self_attention.layer.return_attention :
       y, _, attn = self.self_attention(x, mask=mask, training=training,
                                       return_attn=return_attn, inject=inject) #<mod> added attn
     else : #<mod>
@@ -517,7 +517,7 @@ class SelfAttentionDecoderLayer(tf.keras.layers.Layer):
     if cache is None:
       cache = {}
 
-    outputs, self_kv = self.self_attention( #<mod> <,attention> self_attention is a wrapper on MHA 
+    outputs, self_kv = self.self_attention( #<mod> <,attention> self_attention is a wrapper on MHA
         inputs,
         mask=mask,
         cache=cache.get("self_kv"),

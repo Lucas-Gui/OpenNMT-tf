@@ -71,7 +71,7 @@ if __name__ == '__main__':
     parser.add_argument("-T", help="Testing", action="store_true")
     parser.add_argument("-T2", help="Stronger testing", action="store_true")
     parser.add_argument("--part", help="Save partial results this often", type = int, default=None)
-    parser.add_argument("--max", help="Stops at this many iterations", type=int, required=True, default=200_000)
+    parser.add_argument("--max", help="Stops at this many iterations", type=int, default=20_000)
 
     args = parser.parse_args()
 

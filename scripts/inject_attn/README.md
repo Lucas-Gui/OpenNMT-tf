@@ -1,11 +1,8 @@
-#Attention extraction and injection in OpenNMT-tf self-attention models
+#Attention  injection in OpenNMT-tf self-attention models
 
 This code has been written (or modified, for the OpenNMT-tf folders) during my internship in the summer 2020.
 
-It can be used to :
-1. Identify autoattention heads of a Transformer model according to their ability to focus on syntactic dependencies,
-as in  [Voita et al.](https://arxiv.org/pdf/1905.09418.pdf)
-2. Modify attention between to tokens on a given set of heads, in order to modify or inject syntactic information inside
+It allows the user to modify attention between to tokens on a given set of heads, in order to modify or inject syntactic information inside
  the model
 
 Contact : [lucas.guirardel@polytechnique.edu](mailto:lucas.guirardel@polytechnique.edu)
@@ -18,16 +15,10 @@ tool (such as Stanford Dependencies ?)
 
 ### Required librairies:
 
-- Fasttext (for language identification by _find_fr.py_)
-    - Download the language identification pretrained model from 
-    [here](https://fasttext.cc/docs/en/language-identification.html).
-- Tqdm  
 - Spacy with necessary models (as is, fr_core_news_md, de_core_news_md) 
 - OpenNMT 2.11.1 modified versions (included) : 
-OpenNMT-tf-ex for attention extraction, 
-OpenNMT-tf-inj for attention injection.
+OpenNMT-tf-ex for attention extraction.
 - Tensorflow 
-- Matplotlib for _process_result_attention.py_ 
 
 ## Attention measurement: process from a corpus without syntactical labels
 

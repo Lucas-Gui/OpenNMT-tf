@@ -54,8 +54,8 @@ def main(args):
     with ExitStack() as exit:
         #readers and writers
         tokens_r = exit.enter_context(open(args.tokens))
-        pos_r = exit.enter_context(open(args.pos))
-        writer = exit.enter_context(open(args.pos+args.suffix, "w"))
+        pos_r = exit.enter_context(open(args.dep))
+        writer = exit.enter_context(open(args.dep+args.suffix, "w"))
         text_r = exit.enter_context(open(args.text))
         tokens_writer = exit.enter_context(open(args.tokens+args.suffix, "w") )
         for filename in args.sup:
@@ -235,9 +235,9 @@ if __name__ == '__main__':
                                      "(word, number, punctuation, supbart of a contraction)")
     parser.add_argument("tokens", help="Token file")
     parser.add_argument('text', help="Em-dash-separated speech components ")
-    parser.add_argument("pos", help="Part-of-speech file")
-    parser.add_argument('--sup', help = "Other space_separated properties files to align", nargs="+")
+    parser.add_argument("dep", help="Dependencies file")
     parser.add_argument('--heads', help='Heads file')
+    parser.add_argument('--sup', help = "Other space_separated properties files to align", nargs="+")
     parser.add_argument("--suffix", help="suffix to append at the name of the written files.", default=".aligned")
     parser.add_argument("--spacer", help="Is square or underscore used as a spacer character for tokens ?",
                         required=True)

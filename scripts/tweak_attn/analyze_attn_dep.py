@@ -405,7 +405,7 @@ if __name__ == '__main__':
         parser.add_argument(f"--{k}", help=f"File for {k} category.")
     args = parser.parse_args()
     print(vars(args))
-    testT = args.T
+    testT = args.test
     categories = {k : v for k,v in categories.items() if vars(args)[k]}
     test_text = args.text
     test_distr = args.distr is not None

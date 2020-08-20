@@ -1,12 +1,10 @@
-#Attention extraction and injection in OpenNMT-tf self-attention models
+#Attention extraction in OpenNMT-tf self-attention models
 
 This code has been written (or modified, for the OpenNMT-tf folders) during my internship in the summer 2020.
 
-It can be used to :
-1. Identify autoattention heads of a Transformer model according to their ability to focus on syntactic dependencies,
+It has been designed to identify autoattention heads of a Transformer model according to their ability to focus on syntactic dependencies,
 as in  [Voita et al.](https://arxiv.org/pdf/1905.09418.pdf)
-2. Modify attention between to tokens on a given set of heads, in order to modify or inject syntactic information inside
- the model
+
 
 Contact : [lucas.guirardel@polytechnique.edu](mailto:lucas.guirardel@polytechnique.edu)
 

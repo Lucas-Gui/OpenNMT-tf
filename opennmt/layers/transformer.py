@@ -423,8 +423,13 @@ class SelfAttentionEncoderLayer(tf.keras.layers.Layer):
   def call(self, x, mask=None, training=None,
            return_attn=False, inject=None):  # pylint: disable=arguments-differ
     """Runs the encoder layer."""
-    y, _, attn = self.self_attention(x, mask=mask, training=training,
+    if return_attn:
+      y, _, attn = self.self_attention(x, mask=mask, training=training,
                                       return_attn=return_attn, inject=inject) #<mod> added attn
+    else : #<mod>
+      y,_ = self.self_attention(x, mask=mask, training=training,
+                                      return_attn=return_attn, inject=inject)
+      attn = None
     y = self.ffn(y, training=training)
     return y , attn #<mod> added attn
 

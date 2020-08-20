@@ -353,7 +353,6 @@ if __name__ == '__main__':
     parser.add_argument("-M", help="Model", required=True)
     parser.add_argument("-C", help="Model configuration", required=True)
     parser.add_argument("--test", help="Testing", action="store_true")
-    parser.add_argument("--test_time", action="store_true")
     parser.add_argument("-T", help=f'Tasks among {list(task_dict.keys())}', nargs='+', default=[])
     parser.add_argument("--ampli", help = "Amplification factor controlling the amplitude of injected attention",
                         type = int, default = 1)
@@ -366,7 +365,6 @@ if __name__ == '__main__':
     stats = get_stats(args.stats)
     # setting testing
     gen_test = args.test
-    test_time = args.test_time
 
     tasks = {k : task_dict[k] for k in args.T}
     try :

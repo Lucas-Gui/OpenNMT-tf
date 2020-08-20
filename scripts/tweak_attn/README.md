@@ -58,10 +58,10 @@ Required to study the focus of attention on rarest tokens.
     - Parameter --dep : analyze the focus of attention on these dependencies 
     (e.g. nsubj obj amod advmod to replicae Voita's experiments.)
     - Parameter -R : tokens rarity file, as given by rarity.py
-    - The script makes a pickled AttnResult object
+    - The script saves a pickled AttnResult object.
 
-- Display the results : process_results_attn.py
-    - Take a pickled AttnResult object as argument
+- Display the results : _process_results_attn.py_
+    - Take a path to a pickled AttnResult object as argument
     - Creates different diagrams, and a file score.txt which indicate the best heads for each dependency.
     - Might need manual edition to suit your needs. 
 
@@ -94,7 +94,7 @@ Required to study the focus of attention on rarest tokens.
 
 ## Modified version of OpenNMT
 
-My changes are tagged by `#<mod>` in the code.
+My changes are tagged with `#<mod>` in the code.
 
 ### Usage : extraction
 Return the values of self-attention computed over the input.

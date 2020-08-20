@@ -27,7 +27,7 @@ def main(quantiles):
             print()
             if args.T2:
                 break
-        if not i%(args.max//50) :
+        if not i%(args.max//20) :
             print_log(i, data["tokens"], stack)
         if args.part is not None and not i % args.part :
             save_stats(np.concatenate(stack, axis=2), args.dest+f".{i}", quantiles)
@@ -70,8 +70,8 @@ if __name__ == '__main__':
     parser.add_argument("-C", help="Model configuration", required=True)
     parser.add_argument("-T", help="Testing", action="store_true")
     parser.add_argument("-T2", help="Stronger testing", action="store_true")
-    parser.add_argument("--part", help="Save partial results this often", type = int, default=None)
-    parser.add_argument("--max", help="Stops at this many iterations", type=int, default=20_000)
+    parser.add_argument("--part", help="Save partial results this often", type = int, default=1_000)
+    parser.add_argument("--max", help="Stops at this many iterations", type=int, default=10_000)
 
     args = parser.parse_args()
 

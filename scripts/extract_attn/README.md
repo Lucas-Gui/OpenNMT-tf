@@ -63,7 +63,7 @@ Required to study the focus of attention on rarest tokens.
 - Display the results : process_results_attn.py
     - Take a pickled AttnResult object as argument
     - Creates different diagrams, and a file score.txt which indicate the best heads for each dependency.
-    - Might need manual edition to suit your needs. 
+    - Might need manual edition suit your needs. 
 
  
 ## Attention injection

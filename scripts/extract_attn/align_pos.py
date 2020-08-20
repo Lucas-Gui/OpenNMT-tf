@@ -235,9 +235,9 @@ if __name__ == '__main__':
                                      "(word, number, punctuation, supbart of a contraction)")
     parser.add_argument("tokens", help="Token file")
     parser.add_argument('text', help="Em-dash-separated speech components ")
-    parser.add_argument("dep", help="Dependencies or part-of-speech file")
-    parser.add_argument('--heads', help='Heads file')
+    parser.add_argument("pos", help="Part-of-speech file")
     parser.add_argument('--sup', help = "Other space_separated properties files to align", nargs="+")
+    parser.add_argument('--heads', help='Heads file')
     parser.add_argument("--suffix", help="suffix to append at the name of the written files.", default=".aligned")
     parser.add_argument("--spacer", help="Is square or underscore used as a spacer character for tokens ?",
                         required=True)

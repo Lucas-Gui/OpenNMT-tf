@@ -335,12 +335,10 @@ class MultiHeadAttention(tf.keras.layers.Layer):
     if X_test:
       tf.print("Attention shape in layer : ", attn.shape)
       tf.print("MHA.return_attention : ", self.return_attention)
-    if self.return_attention :
-      return outputs, cache, attn
+
     if return_attn: #<mod>
         return outputs, cache, dot #<mod>
-    return outputs, cache
-
+    return outputs, cache, attn
 
 class TransformerLayerWrapper(common.LayerWrapper):
   """Layer wrapper that applies a standard Transformer preprocessing and

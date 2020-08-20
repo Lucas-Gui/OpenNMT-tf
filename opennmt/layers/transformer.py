@@ -335,10 +335,12 @@ class MultiHeadAttention(tf.keras.layers.Layer):
     if X_test:
       tf.print("Attention shape in layer : ", attn.shape)
       tf.print("MHA.return_attention : ", self.return_attention)
-
+    if self.return_attention :
+      return outputs, cache, attn
     if return_attn: #<mod>
         return outputs, cache, dot #<mod>
-    return outputs, cache, attn
+    return outputs, cache
+
 
 class TransformerLayerWrapper(common.LayerWrapper):
   """Layer wrapper that applies a standard Transformer preprocessing and
@@ -515,7 +517,7 @@ class SelfAttentionDecoderLayer(tf.keras.layers.Layer):
     if cache is None:
       cache = {}
 
-    outputs, self_kv, attention = self.self_attention( #<mod> <,attention> self_attention is a wrapper on MHA with attention = True
+    outputs, self_kv = self.self_attention( #<mod> <,attention> self_attention is a wrapper on MHA 
         inputs,
         mask=mask,
         cache=cache.get("self_kv"),

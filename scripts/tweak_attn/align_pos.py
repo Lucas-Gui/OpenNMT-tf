@@ -241,8 +241,8 @@ if __name__ == '__main__':
     parser.add_argument("--suffix", help="suffix to append at the name of the written files.", default=".aligned")
     parser.add_argument("--spacer", help="Is square or underscore used as a spacer character for tokens ?",
                         required=True)
-    parser.add_argument("-T2", action="store_true", help="Test")
-    parser.add_argument("-T", action="store_true")
+    parser.add_argument("-T", action="store_true", help="Testing")
+    parser.add_argument("-T2", action="store_true", help="Stronger testing")
     parser.add_argument('-L', help='More complete logs', action="store_true")
     parser.add_argument('-f', help='Dumps logs this often', default=10000, type=int)
     args = parser.parse_args()

@@ -1,9 +1,12 @@
-#Attention extraction in OpenNMT-tf self-attention models
+#Attention extraction and injection in OpenNMT-tf self-attention models
 
 This code has been written (or modified, for the OpenNMT-tf folders) during my internship in the summer 2020.
 
-It has been designed to identify autoattention heads of a Transformer model according to their ability to focus on syntactic dependencies,
+It can be used to :
+1. Identify self-attention heads of a Transformer or GPT-2 model according to their ability to focus on syntactic dependencies,
 as in  [Voita et al.](https://arxiv.org/pdf/1905.09418.pdf)
+2. Modify attention between tokens on a given set of heads, in order to modify or inject syntactic information inside
+ the model.
 
 
 Contact : [lucas.guirardel@polytechnique.edu](mailto:lucas.guirardel@polytechnique.edu)
@@ -14,16 +17,15 @@ This has been designed for french -> german translation.
 To adjust it to other languages pairs, one should mind the different tagging schemes in Spacy, or use another tagging 
 tool (such as Stanford Dependencies ?)
 
-### Required librairies:
+All mentions of attention refer to _dot-product attention_, before the application of softmax.
+
+### Required libraries:
 
 - Fasttext (for language identification by _find_fr.py_)
     - Download the language identification pretrained model from 
-    [here](https://fasttext.cc/docs/en/language-identification.html).
-- Tqdm  
+    [here](https://fasttext.cc/docs/en/language-identification.html).  
 - Spacy with necessary models (as is, fr_core_news_md, de_core_news_md) 
-- OpenNMT 2.11.1 modified versions (included) : 
-OpenNMT-tf-ex for attention extraction, 
-OpenNMT-tf-inj for attention injection.
+- OpenNMT 2.11.1 modified version (this package) 
 - Tensorflow 
 - Matplotlib for _process_result_attention.py_ 
 
@@ -85,20 +87,19 @@ Required to study the focus of attention on rarest tokens.
 
 - Evaluate the impact of the injection tasks with _eval_inject.py_ (quite basic) : 
     - Counts and save lines that pass different tests.
-        - Are translation different ?
+        - Are translations different ?
         - Do they differ on words involved in a given dependency ?
     - Note : for compatibility with Spacy, _eval_inject.py_ replaces numerals placeholder with numbers in (1980, 2004)
     - The other solution is to evaluate by hand...
 
-## Modified versions of OpenNMT
+## Modified version of OpenNMT
 
-My modifications are tagged by "#<mod>" in the code.
+My changes are tagged by `#<mod>` in the code.
 
-### OpenNMT-tf-ex
-Version of OpenNMT, modified to return the values of self-attention computed over the input.
+### Usage : extraction
+Return the values of self-attention computed over the input.
 Only for GPT-2's decoder and Transformer encoder.
 
-#### Usage:
 Once the model is loaded:
 ```python 
 tokens, attn = model(data, return_attn = True, training = False)
@@ -108,18 +109,20 @@ tokens, attn = model(data, return_attn = True, training = False)
  
  Note: the model only carries out encoding, and not decoding. The output tokens are those from the input.
 
-### OpenNMT-tf-inj:
-Version of OpenNMT, modified to enable modification of attention values in a Transformer model.
-The user can choose attention value as a function of the input sentence, inject them in chosen heads, and compare the 
-resulting translation with the original one. However, as is, it is not possible to use the attention values as computed 
-by the model to chose the new attention values.
+### Usage : injection
+The user can choose attention values as a function of the input sentence, inject them in the dot-product self-attention of 
+chosen heads, and compare the resulting translation with the original one. 
+However, as of now, it is not possible to use the attention values as computed by the model to chose the new attention values.
+
+This only compatible with Transformer models. Injection is applied only to the encoder.
 
 For example, one could decide to always put an attention of 0 between verbs and subject, but not to double the attention
 of nouns on their adjectives.
 
-#### Usage:
+Let L the number of encoder layers, H the number of heads per layer, and S the number of tokens in the sentence.
 Let `inj_val` a `np.ndarray` of shape (L,H,S,S) containing the values to inject, and
-`inj_mask` a `np.ndarray` of the same shape, containing `True` where attention is to be injected, and false elsewhere.
+`inj_mask` a boolean `np.ndarray` of the same shape, 
+containing `True` where attention is to be injected, and `False` elsewhere.
 
 Then with :
 ```python

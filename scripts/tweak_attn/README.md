@@ -1,4 +1,4 @@
-#Attention extraction and injection in OpenNMT-tf self-attention models
+# Attention extraction and injection in OpenNMT-tf self-attention models
 
 This code has been written (or modified, for the OpenNMT-tf folders) during my internship in the summer 2020.
 
@@ -33,12 +33,12 @@ All mentions of attention refer to _dot-product attention_, before the applicati
 
 - Clean raw text
     - Remove sentences from other languages with _find_fr.py_
-    - Remove nonstandard Unicode characters, especially spaces. (Not strictly necessary, but makes the rest easier)
-        - _remove_spaces.py_ replaces nonstandard spaces.
+    - Remove non-standard Unicode characters, especially spaces. (Not strictly necessary, but makes the rest easier)
+        - _remove_spaces.py_ replaces non-standard spaces.
 
 - Prepare syntactic labels with _make_UD.py_
-    - Can separate sentences from the corpus if needed (flag -S)
-    - Specify studied categories : e.g. --cats gen nb, to save labels of gender and number for each sentence. 
+    - Can separate sentences from the corpus if needed (flag `-S`)
+    - Specify studied categories : e.g. `--cats gen nb`, to save labels of gender and number for each sentence. 
 
 - Tokenize (do according to the model used).
     - If applicable, tokenize the sentences file made by _make_UD.py_ .
@@ -55,9 +55,9 @@ Required to study the focus of attention on rarest tokens.
 
 - Study attention : _analyze_attn_dep.py_
     - Give tokens, heads, dependencies, and labels files, aligned by align_pos.py, as arguments.
-    - Parameter --dep : analyze the focus of attention on these dependencies 
+    - Parameter `--dep`: analyze the focus of attention on these dependencies 
     (e.g. nsubj obj amod advmod to replicae Voita's experiments.)
-    - Parameter -R : tokens rarity file, as given by rarity.py
+    - Parameter `-R`: tokens rarity file, as given by rarity.py
     - The script saves a pickled AttnResult object.
 
 - Display the results : _process_results_attn.py_

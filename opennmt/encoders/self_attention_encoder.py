@@ -84,7 +84,8 @@ class SelfAttentionEncoder(Encoder):
                            return_attn=return_attn, inject=inject_i) #<mod> : added attn
       if return_attn:
         attn_list.append(attn) #<mod>
-    attention = tf.concat(attn_list, axis=0, name="Attention")  # <mod>
+    if return_attn:
+      attention = tf.concat(attn_list, axis=0, name="Attention")  # <mod>
     outputs = self.layer_norm(inputs)
     return outputs, None, sequence_length, attention #<mod> : added attention
 

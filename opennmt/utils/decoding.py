@@ -9,7 +9,7 @@ import tensorflow_addons as tfa
 from opennmt import constants
 from opennmt.utils import misc
 
-X_test = True
+X_test = False
 class Sampler(abc.ABC):
   """Base class for samplers."""
 

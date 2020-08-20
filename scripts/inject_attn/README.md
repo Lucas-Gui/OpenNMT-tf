@@ -60,9 +60,10 @@ Required to study the focus of attention on rarest tokens.
 ## Attention injection
 
 - Statistical measurements of attention: _measure_attn.py_ :
+    - This script uses the **extract_attn** version of OpenNMT-tf 
     - For each head, computes statistical values on attention values (mean, std, first and last deciles.)
     - Makes a folder containing saved numpy arrays.
-    - **Warning**: This script is very memory-consuming, since it keeps every value taken by attention over the corpus.
+    - **Warning**: This script *is* very memory-consuming, since it keeps every value taken by attention over the corpus.
     You should either give it only a small extract of the corpus, or implement a low-memory quantile approximation method.
 
 - Study different ways of injecting attention with _inject_tasks.py_

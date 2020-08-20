@@ -213,18 +213,18 @@ class Decoder(tf.keras.layers.Layer):
     if rank == 2:
       if length_or_step.shape.ndims != 0:
         raise ValueError("length_or_step should be a scalar with the current timestep")
-      outputs, state, attention, internal = self.step(
+      outputs, state, attention = self.step(
           inputs,
           length_or_step,
           state=state,
           memory=self.memory,
           memory_sequence_length=self.memory_sequence_length,
-          training=training) #<mod> internal
+          training=training)
       logits = self.output_layer(outputs)
     elif rank == 3:
       if length_or_step.shape.ndims != 1:
         raise ValueError("length_or_step should contain the length of each sequence")
-      logits, state, attention , internal= self.forward(
+      logits, state, attention = self.forward(
           inputs,
           sequence_length=length_or_step,
           initial_state=state,
@@ -232,10 +232,10 @@ class Decoder(tf.keras.layers.Layer):
           memory_sequence_length=self.memory_sequence_length,
           input_fn=input_fn,
           sampling_probability=sampling_probability,
-          training=training) #<mod> internal
+          training=training)
     else:
       raise ValueError("Unsupported input rank %d" % rank)
-    return logits, state, attention, internal #<mod> internal
+    return logits, state, attention
 
   def forward(self,
               inputs,

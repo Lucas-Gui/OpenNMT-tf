@@ -426,7 +426,7 @@ def dynamic_decode(symbols_to_logits_fn,
     result = symbols_to_logits_fn(inputs, step, state) #would be LanguageModel._decode in my case
     if X_test:
         tf.print("End of symbol_to_logits : ")
-    logits, state = result[0], result[1] #Is OK : result = (logits, state, attention, internal)
+    logits, state = result[0], result[1] #Is OK : result = (logits, state, attention)
     attn = result[2] if len(result) > 2 else None
     if X_test:
       tf.print("Attention in _body : ", attn.shape)

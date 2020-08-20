@@ -133,7 +133,6 @@ class SelfAttentionDecoder(decoder.Decoder):
     # Run each layer.
     new_cache = []
     attn_list = [] #<mod>
-    inputs_list = [] #<mod>
     for i, layer in enumerate(self.layers):
       inputs, layer_cache, attention = layer(
           inputs,
@@ -144,15 +143,13 @@ class SelfAttentionDecoder(decoder.Decoder):
           training=training)
       new_cache.append(layer_cache)
       attn_list.append(attention) #<mod>
-      inputs_list.append(self.layer_norm( inputs)) #<mod>
     outputs = self.layer_norm(inputs)
     attention = tf.concat(attn_list,  axis = 0, name="Attention")#<mod>
 
-    internal = tf.concat(inputs_list, axis = 0, name = "Internal") #<mod>
     if X_test:
         tf.print("Inputs in run : ", inputs.shape)
         tf.print("Attention in _run : ", attention.shape)
-    return outputs, new_cache, attention, internal
+    return outputs, new_cache, attention
 
   def forward(self,
               inputs,
@@ -175,9 +172,8 @@ class SelfAttentionDecoder(decoder.Decoder):
         memory=memory,
         memory_sequence_length=memory_sequence_length,
         training=training)
-    internal = None  # <mod>Internal is returned by _run in a returning_attn context.
     logits = self.output_layer(outputs)
-    return logits, state, attention, internal
+    return logits, state, attention
 
   def step(self,
            inputs,
@@ -197,17 +193,11 @@ class SelfAttentionDecoder(decoder.Decoder):
         training=training)
     outputs = tf.squeeze(outputs, axis=1)
     if attention is not None:
-        #<mod> :
-      # if X_test:
-      #     tf.print("Attention returned by _run : ", attention.shape)
-      # shape = list(attention.shape)
-      # shape = [shape[0]*shape[1]]+[1]+shape[2:]
-      # attention = tf.reshape(attention, shape= shape)#<\mod>
+
       attention = tf.squeeze(attention, axis=1)
       if X_test:
         tf.print("Attention returned by step : ", attention.shape)
-    internal = None  # <mod>Internal is returned by _run in a returning_attn context.
-    return outputs, state, attention, internal
+    return outputs, state, attention
 
   def _get_initial_state(self, batch_size, dtype, initial_state=None):
     # The decoder state contains the keys and values projections of the previous timesteps.

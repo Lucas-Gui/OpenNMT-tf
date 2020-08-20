@@ -5,8 +5,6 @@ import pickle
 import os
 from attn_result import AttnResult
 
-dependencies = ["nsubj", "obj", "amod","advmod","nmod", "det"]
-
 
 def eval_heads_cats(result : AttnResult, dep, cat, pos_lab):
     """Compare scores for a given deps, for all labels in the given category
@@ -49,7 +47,7 @@ def bar_pos_freq(result : AttnResult):
     """Plots the distribution of head position relative to tail for each dep."""
     occurences = result.score_dep[0,0,:,0,0]
     pos_freq = np.apply_along_axis(lambda x: x / occurences, axis=0, arr=pos)
-    fig, axes = plt.subplots(6,1, sharey= "all", sharex="all")
+    fig, axes = plt.subplots(len(dep_list),1, sharey= "all", sharex="all")
     for i, ax in enumerate(axes):
         ax.bar(np.arange(-delta, delta+1),pos_freq[i,:])
         ax.set_xlabel(dep_list[i])

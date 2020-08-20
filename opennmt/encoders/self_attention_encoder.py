@@ -82,7 +82,8 @@ class SelfAttentionEncoder(Encoder):
       inject_i = (inject[0][i,:,:,:], inject[1][i,:,:,:]) if inject is not None else None #<mod>
       inputs, attn = layer(inputs, mask=mask, training=training,
                            return_attn=return_attn, inject=inject_i) #<mod> : added attn
-      attn_list.append(attn) #<mod>
+      if return_attn:
+        attn_list.append(attn) #<mod>
     attention = tf.concat(attn_list, axis=0, name="Attention")  # <mod>
     outputs = self.layer_norm(inputs)
     return outputs, None, sequence_length, attention #<mod> : added attention

@@ -6,7 +6,7 @@ import numpy as np
 from opennmt.layers import common
 from opennmt.utils import misc
 
-X_test = True
+X_test = False
 if X_test:
     import traceback
 

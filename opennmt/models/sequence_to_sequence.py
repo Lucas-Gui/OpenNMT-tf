@@ -143,7 +143,8 @@ class SequenceToSequence(model.SequenceGenerator):
     if EmbeddingsSharingLevel.share_target_embeddings(self.share_embeddings):
       self.decoder.reuse_embeddings(self.labels_inputter.embedding)
 
-  def call(self, features, labels=None, training=None, step=None, return_attn=False):
+  def call(self, features, labels=None, training=None, step=None,
+           return_attn=False, inject=None):
     # Encode the source.
     if X_test:
         tf.print("Seq2Seq.call")
@@ -151,7 +152,9 @@ class SequenceToSequence(model.SequenceGenerator):
     source_length = self.features_inputter.get_length(features)
     source_inputs = self.features_inputter(features, training=training)
     encoder_outputs, encoder_state, encoder_sequence_length, attn_encoder = self.encoder(
-        source_inputs, sequence_length=source_length, training=training ,return_attn=return_attn) #<mod> : attn_encoder
+        source_inputs, sequence_length=source_length, training=training,
+        inject=inject, return_attn=return_attn
+    )
 
     outputs = None
     predictions = None

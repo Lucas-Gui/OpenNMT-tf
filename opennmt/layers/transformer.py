@@ -223,7 +223,8 @@ class MultiHeadAttention(tf.keras.layers.Layer):
           name="relative_position_values", shape=relative_repr_shape)
     super(MultiHeadAttention, self).build(input_shape)
 
-  def call(self, inputs, memory=None, mask=None, cache=None, training=None, return_attn = False):  # pylint: disable=arguments-differ
+  def call(self, inputs, memory=None, mask=None, cache=None, training=None,
+           return_attn=False, inject=None):  # pylint: disable=arguments-differ
     """Runs the layer.
 
     Args:
@@ -307,6 +308,19 @@ class MultiHeadAttention(tf.keras.layers.Layer):
         mask = tf.expand_dims(mask, 1)  # Broadcast on time dimension.
       mask = tf.expand_dims(mask, 1)  # Broadcast on head dimension.
       dot = tf.cast(tf.cast(dot, tf.float32) * mask + ((1.0 - mask) * tf.float32.min), dot.dtype)
+    #<mod>
+    if X_test:
+      # tf.print("In MHA : (before softmaxing) ")
+      # tf.print("Computed attn : ", dot.shape, dot.dtype)
+      # # tf.print("Computed mask : ", mask)
+      if inject is not None:
+        tf.print("Injected attn : ", inject[0].shape)
+        tf.print(tf.where(inject[1]))
+    if inject is not None :
+      mask_inj = tf.cast(inject[1], tf.bool)
+      val_inj = tf.convert_to_tensor(inject[0], dot.dtype)
+      dot = tf.where(mask_inj, val_inj, dot)
+    # <\mod>
 
     attn = tf.cast(tf.nn.softmax(tf.cast(dot, tf.float32)), dot.dtype)
     drop_attn = common.dropout(attn, self.dropout, training=training)
@@ -392,9 +406,7 @@ class SelfAttentionEncoderLayer(tf.keras.layers.Layer):
         num_heads,
         num_units,
         dropout=attention_dropout,
-        maximum_relative_position=maximum_relative_position,
-        return_attention = True #<mod>
-    )
+        maximum_relative_position=maximum_relative_position)
     self.self_attention = TransformerLayerWrapper(
         self.self_attention, dropout)
     self.ffn = FeedForwardNetwork(
@@ -405,10 +417,11 @@ class SelfAttentionEncoderLayer(tf.keras.layers.Layer):
     self.ffn = TransformerLayerWrapper(
         self.ffn, dropout)
 
-  def call(self, x, mask=None, training=None, return_attn=False):  # pylint: disable=arguments-differ
+  def call(self, x, mask=None, training=None,
+           return_attn=False, inject=None):  # pylint: disable=arguments-differ
     """Runs the encoder layer."""
     y, _, attn = self.self_attention(x, mask=mask, training=training,
-                                      return_attn=return_attn) #<mod> added attn
+                                      return_attn=return_attn, inject=inject) #<mod> added attn
     y = self.ffn(y, training=training)
     return y , attn #<mod> added attn
 
@@ -456,9 +469,7 @@ class SelfAttentionDecoderLayer(tf.keras.layers.Layer):
         num_heads,
         num_units,
         dropout=attention_dropout,
-        maximum_relative_position=maximum_relative_position,
-        return_attention=True #<mod> Now the MultiHeadAttention layers return attention (but only for first head ? notclear)
-    )
+        maximum_relative_position=maximum_relative_position)
     self.self_attention = TransformerLayerWrapper(
         self.self_attention, dropout)
     self.attention = []
@@ -504,7 +515,7 @@ class SelfAttentionDecoderLayer(tf.keras.layers.Layer):
         cache=cache.get("self_kv"),
         training=training)
 
-    attention = None #<mod> <commented>
+    attention = None
     memory_kv = []
     if memory is not None:
       memory_cache = cache.get("memory_kv")

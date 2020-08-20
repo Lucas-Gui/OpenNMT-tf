@@ -67,8 +67,9 @@ class SelfAttentionEncoder(Encoder):
             ffn_activation=ffn_activation,
             maximum_relative_position=maximum_relative_position)
         for i in range(num_layers)]
+    self.num_heads= num_heads #<mod>
 
-  def call(self, inputs, sequence_length=None, training=None,  return_attn=False):
+  def call(self, inputs, sequence_length=None, training=None,  return_attn=False, inject=None):
     inputs *= self.num_units**0.5
     attn_list = [] #<mod>
     if X_test:
@@ -77,8 +78,10 @@ class SelfAttentionEncoder(Encoder):
       inputs = self.position_encoder(inputs)
     inputs = common.dropout(inputs, self.dropout, training=training)
     mask = self.build_mask(inputs, sequence_length=sequence_length)
-    for l,layer in enumerate(self.layers): #<mod> : enumerate
-      inputs, attn = layer(inputs, mask=mask, training=training,  return_attn=return_attn) #<mod> : added attn
+    for i,layer in enumerate(self.layers): #<mod> : enumerate
+      inject_i = (inject[0][i,:,:,:], inject[1][i,:,:,:]) if inject is not None else None #<mod>
+      inputs, attn = layer(inputs, mask=mask, training=training,
+                           return_attn=return_attn, inject=inject_i) #<mod> : added attn
       attn_list.append(attn) #<mod>
     attention = tf.concat(attn_list, axis=0, name="Attention")  # <mod>
     outputs = self.layer_norm(inputs)

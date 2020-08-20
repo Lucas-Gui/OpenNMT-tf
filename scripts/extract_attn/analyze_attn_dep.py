@@ -390,8 +390,7 @@ if __name__ == '__main__':
     parser.add_argument("dep_file", help="dependencies")
     parser.add_argument("dest")
     parser.add_argument("--dep", help = "Dependencies to add to the list of studied dependencies", nargs="+")
-    parser.add_argument("--test", action="store_true")
-    parser.add_argument("--speed", action="store_true", help="Test speed of different parts")
+    parser.add_argument("-T","--test", action="store_true")
     parser.add_argument("--text", action="store_true", help="Do not calculate the data on attention, only those depending on the text")
     parser.add_argument("--distr", help="Aslo returns the values of attention for the d-th more attended values for each word"
                                         "The point is to study the relative weight of the more important tokens",
@@ -402,14 +401,12 @@ if __name__ == '__main__':
     parser.add_argument("-R", help="Rarity file", required=True)
     parser.add_argument("--cfg", help="Config file")
     parser.add_argument("-f", help="Dumps saves this often", default=5000, type = int)
-    parser.add_argument("-T", help="Tests", action="store_true")
     for k in categories.keys():
         parser.add_argument(f"--{k}", help=f"File for {k} category.")
     args = parser.parse_args()
     print(vars(args))
     testT = args.T
     categories = {k : v for k,v in categories.items() if vars(args)[k]}
-    test_speed = args.speed
     test_text = args.text
     test_distr = args.distr is not None
     if test_distr :

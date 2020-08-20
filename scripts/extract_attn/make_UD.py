@@ -134,7 +134,7 @@ def main(reader, w_h, w_d, w_t, lang, w_cats, cats, w_s = None):
             print_log(i,dep, heads, sent)
         if args.N is not None and i==args.N -1 :
             break
-    return i
+    return i+1
 
 def remove_spaces(sent):
     l=[]

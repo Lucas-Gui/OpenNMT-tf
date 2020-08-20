@@ -32,4 +32,4 @@ if __name__ == '__main__':
 
         for t, j in freq_list:
             writer.write(t+" "+str(j)+"\n")
-    print(f"Found {count_empty_tokens} empty tokens on {i} lines")
+    print(f"Found {count_empty_tokens} empty tokens on {i+1} lines")

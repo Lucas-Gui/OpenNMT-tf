@@ -335,7 +335,9 @@ class MultiHeadAttention(tf.keras.layers.Layer):
       tf.print("Attention shape in layer : ", attn.shape)
       tf.print("MHA.return_attention : ", self.return_attention)
     if self.return_attention :
-      return outputs, cache, dot #<mod> replaced attention with dot (to have the data before softmax)
+      return outputs, cache, attn
+    if return_attn: #<mod>
+        return outputs, cache, dot #<mod>
     return outputs, cache
 
 

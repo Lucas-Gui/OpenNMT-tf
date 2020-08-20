@@ -6,7 +6,7 @@ import numpy as np
 from opennmt.layers import common
 from opennmt.utils import misc
 
-X_test = False
+X_test = True
 if X_test:
     import traceback
 
@@ -242,6 +242,7 @@ class MultiHeadAttention(tf.keras.layers.Layer):
       probabilities of the first head (if :obj:`return_attention` is ``True``).
     """
     if X_test:
+        tf.print("Return_attn : ", return_attn)
         pass
         tf.print("Inputs in layer() :",inputs.shape)
         tf.print("Memory :", memory)

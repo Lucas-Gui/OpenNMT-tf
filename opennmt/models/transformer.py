@@ -115,7 +115,6 @@ class Transformer(SequenceToSequence):
         decoder,
         share_embeddings=share_embeddings)
 
-  # <mod>
   @property
   def num_layers(self):
       return len(self.encoder.layers)

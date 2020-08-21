@@ -8,7 +8,6 @@ from opennmt.encoders.encoder import Encoder
 from opennmt.layers.position import SinusoidalPositionEncoder
 from opennmt.layers import common
 
-X_test=False
 
 class SelfAttentionEncoder(Encoder):
   """Encoder using self-attention as described in
@@ -50,7 +49,7 @@ class SelfAttentionEncoder(Encoder):
     """
     super(SelfAttentionEncoder, self).__init__(**kwargs)
     self.num_units = num_units
-    self.num_heads = num_heads #<mod> : added
+    self.num_heads = num_heads
     self.dropout = dropout
     self.position_encoder = None
     if position_encoder_class is not None:
@@ -67,26 +66,24 @@ class SelfAttentionEncoder(Encoder):
             ffn_activation=ffn_activation,
             maximum_relative_position=maximum_relative_position)
         for i in range(num_layers)]
-    self.num_heads= num_heads #<mod>
+    self.num_heads= num_heads
 
   def call(self, inputs, sequence_length=None, training=None,  return_attn=False, inject=None):
     inputs *= self.num_units**0.5
-    attn_list = [] #<mod>
-    if X_test:
-        tf.print("--SAE.call--")
+    attn_list = []
     if self.position_encoder is not None:
       inputs = self.position_encoder(inputs)
     inputs = common.dropout(inputs, self.dropout, training=training)
     mask = self.build_mask(inputs, sequence_length=sequence_length)
-    for i,layer in enumerate(self.layers): #<mod> : enumerate
-      inject_i = (inject[0][i,:,:,:], inject[1][i,:,:,:]) if inject is not None else None #<mod>
+    for i,layer in enumerate(self.layers):
+      inject_i = (inject[0][i,:,:,:], inject[1][i,:,:,:]) if inject is not None else None
       inputs, attn = layer(inputs, mask=mask, training=training,
-                           return_attn=return_attn, inject=inject_i) #<mod> : added attn
+                           return_attn=return_attn, inject=inject_i)
       if return_attn:
-        attn_list.append(attn) #<mod>
-    attention = tf.concat(attn_list, axis=0, name="Attention") if return_attn else None# <mod>
+        attn_list.append(attn)
+    attention = tf.concat(attn_list, axis=0, name="Attention") if return_attn else None
     outputs = self.layer_norm(inputs)
-    return outputs, None, sequence_length, attention #<mod> : added attention
+    return outputs, None, sequence_length, attention
 
   def map_v1_weights(self, weights):
     m = []

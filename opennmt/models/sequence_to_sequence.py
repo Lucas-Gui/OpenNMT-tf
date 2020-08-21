@@ -18,7 +18,6 @@ from opennmt.utils import losses
 from opennmt.utils import misc
 from opennmt.decoders import decoder as decoder_util
 
-X_test = False
 class EmbeddingsSharingLevel(object):
   """Level of embeddings sharing.
 
@@ -146,15 +145,12 @@ class SequenceToSequence(model.SequenceGenerator):
   def call(self, features, labels=None, training=None, step=None,
            return_attn=False, inject=None):
     # Encode the source.
-    if X_test:
-        tf.print("Seq2Seq.call")
-        tf.print("----Encoding---\n")
     source_length = self.features_inputter.get_length(features)
     source_inputs = self.features_inputter(features, training=training)
     encoder_outputs, encoder_state, encoder_sequence_length, attn_encoder = self.encoder(
         source_inputs, sequence_length=source_length, training=training,
         inject=inject, return_attn=return_attn
-    ) #<mod> attn_encoder
+    )
 
     outputs = None
     predictions = None
@@ -169,8 +165,6 @@ class SequenceToSequence(model.SequenceGenerator):
           encoder_sequence_length,
           step=step,
           training=training)
-    if X_test:
-        tf.print("----Decoding---\n")
     # When not in training, also compute the model predictions.
     if not training:
       predictions = self._dynamic_decode(

@@ -94,7 +94,6 @@ Required to study the focus of attention on rarest tokens.
 
 ## Modified version of OpenNMT
 
-My changes are tagged with `#<mod>` in the code.
 
 ### Usage : extraction
 Return the values of self-attention computed over the input.

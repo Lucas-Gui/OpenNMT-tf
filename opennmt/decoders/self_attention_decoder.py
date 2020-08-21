@@ -6,7 +6,6 @@ from opennmt.decoders import decoder
 from opennmt.layers import common, transformer
 from opennmt.layers.position import SinusoidalPositionEncoder
 
-X_test=False
 class SelfAttentionDecoder(decoder.Decoder):
   """Encoder using self-attention as described in
   https://arxiv.org/abs/1706.03762.
@@ -96,14 +95,6 @@ class SelfAttentionDecoder(decoder.Decoder):
            step=None,
            training=None):
     # Process inputs.
-    if X_test:
-        tf.print("Inputs in _run",step," : ", inputs.shape)
-        # tf.print("seqlen",sequence_length)
-        # tf.print(cache if cache is None else len(cache))
-        # tf.print("Memory : ", memory)
-        # tf.print(memory_sequence_length)
-        # tf.print(step)
-        # tf.print(training)
     inputs *= self.num_units**0.5
     if self.position_encoder is not None:
       inputs = self.position_encoder(inputs, position=step + 1 if step is not None else None)
@@ -132,7 +123,7 @@ class SelfAttentionDecoder(decoder.Decoder):
 
     # Run each layer.
     new_cache = []
-    attn_list = [] #<mod>
+    attn_list = []
     for i, layer in enumerate(self.layers):
       inputs, layer_cache, attention = layer(
           inputs,
@@ -142,13 +133,9 @@ class SelfAttentionDecoder(decoder.Decoder):
           cache=cache[i] if cache is not None else None,
           training=training)
       new_cache.append(layer_cache)
-      attn_list.append(attention) #<mod>
+      attn_list.append(attention)
     outputs = self.layer_norm(inputs)
-    attention = tf.concat(attn_list,  axis = 0, name="Attention")#<mod>
-
-    if X_test:
-        tf.print("Inputs in run : ", inputs.shape)
-        tf.print("Attention in _run : ", attention.shape)
+    attention = tf.concat(attn_list,  axis = 0, name="Attention")
     return outputs, new_cache, attention
 
   def forward(self,
@@ -160,8 +147,6 @@ class SelfAttentionDecoder(decoder.Decoder):
               input_fn=None,
               sampling_probability=None,
               training=None):
-    if X_test:
-        tf.print("Forward ")
     _ = initial_state
     _ = input_fn
     if sampling_probability is not None:
@@ -195,8 +180,6 @@ class SelfAttentionDecoder(decoder.Decoder):
     if attention is not None:
 
       attention = tf.squeeze(attention, axis=1)
-      if X_test:
-        tf.print("Attention returned by step : ", attention.shape)
     return outputs, state, attention
 
   def _get_initial_state(self, batch_size, dtype, initial_state=None):

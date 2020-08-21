@@ -6,9 +6,6 @@ import numpy as np
 from opennmt.layers import common
 from opennmt.utils import misc
 
-X_test = False
-if X_test:
-    import traceback
 
 
 def _lower_triangle_mask(sequence_length, maximum_length=None, dtype=tf.bool):
@@ -241,16 +238,7 @@ class MultiHeadAttention(tf.keras.layers.Layer):
       A tuple with the attention context, the updated cache and the attention
       probabilities of the first head (if :obj:`return_attention` is ``True``).
     """
-    if X_test:
-        tf.print("Return_attn : ", return_attn)
-        pass
-        tf.print("Inputs in layer() :",inputs.shape)
-        tf.print("Memory :", memory)
-        # tf.print("Cache : ", cache.shape) #sometimes None, sometimes a tuple of nested lists I think ? Doesn't really matter
-        # tf.print("Multiheadattention: ", inputs)
-        # for line in traceback.format_stack():
-        #     tf.print(line.strip())
-        tf.print("\n")
+
     def _compute_kv(x):
       keys = self.linear_keys(x)
       keys = split_heads(keys, self.num_heads)
@@ -293,14 +281,9 @@ class MultiHeadAttention(tf.keras.layers.Layer):
       relative_repr_values = None
 
     cache = (keys, values)
-    if X_test:
-        tf.print(keys.shape,  values.shape)
     # Dot product attention.
     dot = tf.matmul(queries, keys, transpose_b=True)
 
-    if X_test:
-        tf.print("Dot : ", dot.shape)
-        tf.print(dot[0,0,0,:])
     if relative_repr_keys is not None:
       dot += matmul_with_relative_representations(queries, relative_repr_keys, transpose_b=True)
     if mask is not None and not return_attn:
@@ -309,19 +292,11 @@ class MultiHeadAttention(tf.keras.layers.Layer):
         mask = tf.expand_dims(mask, 1)  # Broadcast on time dimension.
       mask = tf.expand_dims(mask, 1)  # Broadcast on head dimension.
       dot = tf.cast(tf.cast(dot, tf.float32) * mask + ((1.0 - mask) * tf.float32.min), dot.dtype)
-    #<mod>
-    if X_test:
-      # tf.print("In MHA : (before softmaxing) ")
-      # tf.print("Computed attn : ", dot.shape, dot.dtype)
-      # # tf.print("Computed mask : ", mask)
-      if inject is not None:
-        tf.print("Injected attn : ", inject[0].shape)
-        tf.print(tf.where(inject[1]))
     if inject is not None :
+      # replace values in attn with values from val_inj where needed
       mask_inj = tf.cast(inject[1], tf.bool)
       val_inj = tf.convert_to_tensor(inject[0], dot.dtype)
       dot = tf.where(mask_inj, val_inj, dot)
-    # <\mod>
 
     attn = tf.cast(tf.nn.softmax(tf.cast(dot, tf.float32)), dot.dtype)
     drop_attn = common.dropout(attn, self.dropout, training=training)
@@ -330,15 +305,12 @@ class MultiHeadAttention(tf.keras.layers.Layer):
       heads += matmul_with_relative_representations(drop_attn, relative_repr_values)
 
     # Concatenate all heads output.
-    combined = combine_heads(heads) #reshape [B,H,T,D] into [B,T,D*H]
+    combined = combine_heads(heads)
     outputs = self.linear_output(combined)
-    if X_test:
-      tf.print("Attention shape in layer : ", attn.shape)
-      tf.print("MHA.return_attention : ", self.return_attention)
+    if return_attn:
+        return outputs, cache, dot
     if self.return_attention :
       return outputs, cache, attn
-    if return_attn: #<mod>
-        return outputs, cache, dot #<mod>
     return outputs, cache
 
 
@@ -425,13 +397,13 @@ class SelfAttentionEncoderLayer(tf.keras.layers.Layer):
     """Runs the encoder layer."""
     if return_attn or self.self_attention.layer.return_attention :
       y, _, attn = self.self_attention(x, mask=mask, training=training,
-                                      return_attn=return_attn, inject=inject) #<mod> added attn
-    else : #<mod>
+                                      return_attn=return_attn, inject=inject)
+    else :
       y,_ = self.self_attention(x, mask=mask, training=training,
                                       return_attn=return_attn, inject=inject)
       attn = None
     y = self.ffn(y, training=training)
-    return y , attn #<mod> added attn
+    return y , attn
 
   def map_v1_weights(self, weights):
     m = []
@@ -481,7 +453,7 @@ class SelfAttentionDecoderLayer(tf.keras.layers.Layer):
     self.self_attention = TransformerLayerWrapper(
         self.self_attention, dropout)
     self.attention = []
-    for i in range(num_sources): #num_sources = 0 in a LanguageModel
+    for i in range(num_sources):
       attention = MultiHeadAttention(
           num_heads,
           num_units,
@@ -517,7 +489,7 @@ class SelfAttentionDecoderLayer(tf.keras.layers.Layer):
     if cache is None:
       cache = {}
 
-    outputs, self_kv = self.self_attention( #<mod> <,attention> self_attention is a wrapper on MHA
+    outputs, self_kv = self.self_attention(
         inputs,
         mask=mask,
         cache=cache.get("self_kv"),
@@ -529,7 +501,7 @@ class SelfAttentionDecoderLayer(tf.keras.layers.Layer):
       memory_cache = cache.get("memory_kv")
       if memory_cache is None:
         memory_cache = [None] * len(self.attention)
-      for layer, mem, mem_mask, mem_cache in zip( #isn't used for Language Model
+      for layer, mem, mem_mask, mem_cache in zip(
           self.attention, memory, memory_mask, memory_cache):
         result = layer(
             outputs,

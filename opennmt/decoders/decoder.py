@@ -10,7 +10,6 @@ from opennmt.layers import common
 from opennmt.utils import decoding
 from opennmt.utils import misc
 
-X_test = True
 
 def get_sampling_probability(step,
                              read_probability=None,
